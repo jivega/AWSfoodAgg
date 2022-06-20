@@ -1,3 +1,4 @@
 aws cloudformation deploy \
   --template codepipeline.yml \
-  --stack-name awsfoodagg-Stack 
+  --capabilities CAPABILITY_NAMED_IAM \
+  --stack-name awsfoodagg-Stack-codepipeline
