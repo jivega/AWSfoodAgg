@@ -1,0 +1,6 @@
+Resources:
+  MyRepo:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: AWSfoodAgg
+      RepositoryDescription: AWS project to analyze WHO Food data
