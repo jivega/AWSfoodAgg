@@ -6,19 +6,7 @@ Parameters:
   RepositoryName:
     Description: CodeCommit repository name
     Type: String
-    Default: AWSfoodAgg
-  ApplicationName:
-    Description: CodeDeploy application name
-    Type: String
-    Default: DemoApplication
-  BetaFleet:
-    Description: Fleet configured in CodeDeploy
-    Type: String
-    Default: DemoFleet
-  CodePipelineArtifactStoreBucket:
-    Description: BucketToStore
-    Type: String
-    Default: cdk-hnb659fds-assets-571397504118-eu-west-1
+    Default: AWSfoodAgg  
     
 Resources:
   AppPipeline:
