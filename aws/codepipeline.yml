@@ -7,12 +7,64 @@ Parameters:
     Description: CodeCommit repository name
     Type: String
     Default: AWSfoodAgg  
-    
+  BucketNameArtifactory:
+    Description: CodeCommit repository name
+    Type: String
+    Default: codepipelineartifact-aws-common     
 Resources:
+  AppCodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: myCodeBuildName 
+      Description: CodeBuild to build sbt project
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/java:openjdk-8
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - ls -la
+                - uname -a
+                - sudo apt-get update
+                - sudo apt-get install apt-transport-https ca-certificates
+                - echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+                - echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list
+                - curl -sLk "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add -
+                - sudo apt-get update
+                - sudo apt-get install sbt
+            pre_build:
+              commands:
+                - echo "prebuild"
+            build:
+              commands:
+                - sbt clean compile test package
+                - ls -la
+                - ls -la target
+          artifacts:
+            files:
+              - target/scala-2.13/*.jar
+            discard-paths: yes
+          cache:
+            paths:
+              - /root/.sbt/**/*
+              - /root/.m2/**/*
+              - /root/.ivy2/**/*
+      TimeoutInMinutes: 10
+      Tags:
+        - Key: projectname
+          Value: awsfoodagg
   AppPipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      Name: awsfoodagg-codepipeline2
+      Name: awsfoodagg-codepipeline
       RoleArn: !GetAtt 
         - CodePipelineServiceRole
         - Arn
@@ -32,23 +84,39 @@ Resources:
                 RepositoryName: !Ref RepositoryName
                 PollForSourceChanges: false
               RunOrder: 1
-        - Name: Beta
+        - Name: Build
           Actions:
-            - Name: BetaAction
+            - Name: ScalaBuild
               InputArtifacts:
                 - Name: SourceOutput
+              OutputArtifacts:
+                - Name: scalabuilt    
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref AppCodeBuild   
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: ScalaDeploy
+              InputArtifacts:
+                - Name: scalabuilt
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Version: 1
-                Provider: CodeDeploy
+                Provider: S3
               Configuration:
-                ApplicationName: !Ref ApplicationName
-                DeploymentGroupName: !Ref BetaFleet
-              RunOrder: 1
+                Extract: True
+                BucketName: !Ref BucketNameArtifactory
+                ObjectKey: deploy
+              RunOrder: 1      
       ArtifactStore:
         Type: S3
-        Location: !Ref CodePipelineArtifactStoreBucket
+        Location: !Ref BucketNameArtifactory
   CodePipelineServiceRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -62,7 +130,7 @@ Resources:
             Action: 'sts:AssumeRole'
       Path: /
       Policies:
-        - PolicyName: AWS-CodePipeline-Service-3
+        - PolicyName: AWS-CodePipeline-Service-food
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -119,3 +187,36 @@ Resources:
                   - 'sqs:*'
                   - 'ecs:*'
                 Resource: '*'
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 'logs:*'
+                - 'ec2:CreateNetworkInterface'
+                - 'ec2:DescribeNetworkInterfaces'
+                - 'ec2:DeleteNetworkInterface'
+                - 'ec2:DescribeSubnets'
+                - 'ec2:DescribeSecurityGroups'
+                - 'ec2:DescribeDhcpOptions'
+                - 'ec2:DescribeVpcs'
+                - 'ec2:CreateNetworkInterfacePermission'
+                Effect: Allow
+                Resource: '*'
+              - Effect: Allow
+                Action: "s3:*"
+                Resource:
+                  - "arn:aws:s3:::codepipelineartifact-aws-common"
+                  - "arn:aws:s3:::codepipelineartifact-aws-common/*"
