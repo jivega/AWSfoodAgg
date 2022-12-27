@@ -10,7 +10,11 @@ Parameters:
   BucketNameArtifactory:
     Description: CodeCommit repository name
     Type: String
-    Default: codepipelineartifact-aws-common     
+    Default: codepipelineartifact-aws-common
+  StackName:
+    Description: Stack name
+    Type: String
+    Default: awsfoodagg-stackname  
 Resources:
   AppCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -113,7 +117,24 @@ Resources:
                 Extract: True
                 BucketName: !Ref BucketNameArtifactory
                 ObjectKey: deploy
-              RunOrder: 1      
+              RunOrder: 1
+            - Name: InfraDeploy
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                Capabilities: CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                StackName: !Ref StackName
+                TemplatePath: SourceOutput::aws/infra/infracodepipeline.yml
+                TemplateConfiguration: SourceOutput::aws/infra/params.json
+                OutputFileName: outputs.json
+              RunOrder: 1
       ArtifactStore:
         Type: S3
         Location: !Ref BucketNameArtifactory
@@ -220,3 +241,46 @@ Resources:
                 Resource:
                   - "arn:aws:s3:::codepipelineartifact-aws-common"
                   - "arn:aws:s3:::codepipelineartifact-aws-common/*"
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+            Effect: Allow
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:GetRolePolicy
+                  - iam:GetPolicy
+                  - iam:GetPolicyVersion
+                  - iam:GetRole
+                  - iam:PassRole
+                  - iam:AttachRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:GetInstanceProfile
+                  - iam:CreateInstanceProfile
+                  - iam:RemoveRoleFromInstanceProfile
+                  - iam:AddRoleToInstanceProfile
+                  - iam:DeleteInstanceProfile
+                Resource: '*'
+              - Effect: Allow
+                Action: codebuild:*
+                Resource: '*'
+              - Effect: Allow
+                Action: cloudformation:*
+                Resource: '*'
