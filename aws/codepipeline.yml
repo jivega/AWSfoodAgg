@@ -238,9 +238,7 @@ Resources:
                 Resource: '*'
               - Effect: Allow
                 Action: "s3:*"
-                Resource:
-                  - "arn:aws:s3:::codepipelineartifact-aws-common"
-                  - "arn:aws:s3:::codepipelineartifact-aws-common/*"
+                Resource: '*'
   CloudFormationRole:
     Type: AWS::IAM::Role
     Properties:
@@ -284,3 +282,4 @@ Resources:
               - Effect: Allow
                 Action: cloudformation:*
                 Resource: '*'
+                s3:CreateBucket
