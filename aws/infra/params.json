@@ -1,5 +1,6 @@
 {
   "Parameters": {
-    "BucketName": "fao-awsfoodaggparam"
+    "BucketName": "fao-awsfoodaggparam",
+    "LambdaFunctionName":"LambdaEMRFunct"
   }
 }

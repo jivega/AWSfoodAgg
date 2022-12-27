@@ -237,8 +237,10 @@ Resources:
                 Effect: Allow
                 Resource: '*'
               - Effect: Allow
-                Action: "s3:*"
-                Resource: '*'
+                Action: s3:*
+                Resource: 
+                - "arn:aws:s3:::codepipelineartifact-aws-common"
+                - "arn:aws:s3:::codepipelineartifact-aws-common/*"
   CloudFormationRole:
     Type: AWS::IAM::Role
     Properties:
@@ -261,9 +263,14 @@ Resources:
                 Action:
                   - iam:CreateRole
                   - iam:DeleteRole
+                  - iam:CreatePolicy
+                  - iam:ListPolicyVersions
                   - iam:PutRolePolicy
                   - iam:DeleteRolePolicy
+                  - iam:DeletePolicy
                   - iam:GetRolePolicy
+                  - iam:CreatePolicyVersion
+                  - iam:DeletePolicyVersion
                   - iam:GetPolicy
                   - iam:GetPolicyVersion
                   - iam:GetRole
@@ -282,4 +289,15 @@ Resources:
               - Effect: Allow
                 Action: cloudformation:*
                 Resource: '*'
-                s3:CreateBucket
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - lambda:GetFunction
+                  - lambda:CreateFunction
+                  - lambda:DeleteFunction
+                  - lambda:UpdateFunctionCode
+                Resource: '*'
+                

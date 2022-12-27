@@ -10,3 +10,8 @@ lazy val root = (project in file("."))
     name := "AWSfoodAgg",
     libraryDependencies += scalaTest % Test
   )
+
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "3.3.0",
+  "org.apache.spark" %% "spark-sql" % "3.3.0"
+)
