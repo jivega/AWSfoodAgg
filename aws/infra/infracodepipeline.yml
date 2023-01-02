@@ -59,8 +59,8 @@ Resources:
                     LogUri= 's3://fao-awsfoodaggparam/prefix/logs',
                     ReleaseLabel= 'emr-6.9.0',
                     Instances={
-                        'MasterInstanceType': 'm5.xlarge',
-                        'SlaveInstanceType': 'm5.large',
+                        'MasterInstanceType': 'm3.xlarge',
+                        'SlaveInstanceType': 'm3.large',
                         'InstanceCount': 1,
                         'KeepJobFlowAliveWhenNoSteps': False,
                         'TerminationProtected': False,
@@ -78,6 +78,16 @@ Resources:
                     ServiceRole = 'EMR_DefaultRole',
                     Steps=[
                         {
+                            'Name': 'test shell',
+                            'ActionOnFailure': 'TERMINATE_CLUSTER',
+                            'HadoopJarStep': {
+                                    'Jar': 's3://us-west-2.elasticmapreduce/libs/script-runner/script-runner.jar',
+                                    'Args': [
+                                        's3://codepipelineartifact-aws-common/deploy/shell/copyfaodata.sh'
+                                    ]
+                            }
+                        },
+                        {
                             'Name': 'fao-data-analysis',
                             'ActionOnFailure': 'TERMINATE_CLUSTER',
                             'HadoopJarStep': {
@@ -89,7 +99,7 @@ Resources:
                                         '--num-executors', '1',
                                         '--executor-cores', '2',
                                         '--class', 'com.jivega.awsfoodagg.driver.Driver',
-                                        's3://codepipelineartifact-aws-common/deploy/awsfoodagg_2.13-0.1.0-SNAPSHOT.jar',
+                                        's3://codepipelineartifact-aws-common/deploy/jar/awsfoodagg_2.12-0.1.0-SNAPSHOT.jar',
                                         's3://fao-awsfoodaggparam/prefix/fake_sales_data.csv',
                                         's3://fao-awsfoodaggparam/prefix/outputs/report_1/'
                                     ]
