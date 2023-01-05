@@ -16,6 +16,10 @@ object FaoPipeline {
     df.filter(df("Item Code (CPC)") === "'2167"  && df("Year") === "2020" ).sort(col("Value").desc).show(300,false)
     df.filter(df("Item Code (CPC)") === "'2167"  && df("Year") === "2021" ).sort(col("Value").desc).show(300,false)
     
+    // Sugar Cane '01802
+    df.filter(df("Item Code (CPC)") === "'01802"  && df("Year") === "2019" ).sort(col("Value").desc).show(300,false)
+    df.filter(df("Item Code (CPC)") === "'01802"  && df("Year") === "2020" ).sort(col("Value").desc).show(300,false)
+    
     df.filter(df("Year") === "2020" ).sort(col("Value").desc).show(200,false)
   }
 }
