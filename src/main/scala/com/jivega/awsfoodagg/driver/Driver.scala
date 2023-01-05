@@ -13,7 +13,7 @@ object Driver {
       .getOrCreate()           
 
     println(hello)
-    val df = spark.read.option("header", "true").csv("s3://fao-awsfoodaggparam/data/Production_Crops_Livestock_E_All_Data_(Normalized).csv")
+    val df = spark.read.option("header", "true").option("inferSchema","True").csv("s3://fao-awsfoodaggparam/data/Production_Crops_Livestock_E_All_Data_(Normalized).csv")
     df.printSchema()
     df.show(false)
     df.groupBy("Area").agg(count(lit(1)).alias("NumOfArea")).show(200,false)
