@@ -1,4 +1,5 @@
 echo "Pepee"
+df -h
 exit 0
 mkdir datazip
 mkdir data
