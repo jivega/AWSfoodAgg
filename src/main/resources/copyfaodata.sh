@@ -6,6 +6,7 @@ mkdir data
 cd datazip
 wget https://fenixservices.fao.org/faostat/static/bulkdownloads/FAOSTAT_A-S_E.zip .
 wget https://fenixservices.fao.org/faostat/static/bulkdownloads/FAOSTAT_T-Z_E.zip .
+
 ls -laR 
 unzip FAOSTAT_A-S_E.zip -d ../data
 unzip FAOSTAT_T-Z_E.zip -d ../data
