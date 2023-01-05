@@ -20,6 +20,11 @@ object FaoPipeline {
     df.filter(df("Item Code (CPC)") === "'01802"  && df("Year") === "2019" ).sort(col("Value").desc).show(300,false)
     df.filter(df("Item Code (CPC)") === "'01802"  && df("Year") === "2020" ).sort(col("Value").desc).show(300,false)
     
+    // Spain Area '724
+    df.filter(df("Item Code (CPC)") === "'01802"  && df("Area Code (M49)") === "'724" ).sort(col("Year").desc).show(300,false)
+    // Europe '150 
+    df.filter(df("Item Code (CPC)") === "'150"  && df("Area Code (M49)") === "'724" ).sort(col("Year").desc).show(300,false)
+    
     df.filter(df("Year") === "2020" ).sort(col("Value").desc).show(200,false)
   }
 }
