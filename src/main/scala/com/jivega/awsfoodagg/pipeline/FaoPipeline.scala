@@ -12,7 +12,7 @@ object FaoPipeline {
     df.groupBy("Element Code","Element").agg(count(lit(1)).alias("NumOfElements")).sort("Element","Element Code").show(500,false)
     df.groupBy("Unit").agg(count(lit(1)).alias("NumOfUnits")).sort("Unit").show(300,false)
     // Top Olive Oil '2167
-    df.filter(df("Item Code (CPC)") === "'2167").sort(col("Value").desc).show(300,false)
+    df.filter(df("Item Code (CPC)") === "'2167"  && df("Year") === "2020" ).sort(col("Value").desc).show(300,false)
     
   }
 }
