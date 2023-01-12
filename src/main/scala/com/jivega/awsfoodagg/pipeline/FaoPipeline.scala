@@ -17,8 +17,15 @@ class FaoPipeline (spark: SparkSession) {
     val dfArea = spark.read.option("header", "true").option("inferSchema","True").csv(pathArea)
     dfArea.printSchema()
     dfArea.show(300,false)
-    dfArea.filter(dfArea("Country") === "Afghanistan" ).sort(col("Country Group").desc).show(300,false) 
+    println("dfArea Afghanistan")
+    dfArea.filter(dfArea("Country") === "Afghanistan" ).sort(col("Country Group").desc).show(300,false)
+    println("dfArea group 5707")
+    dfArea.filter(dfArea("Country Group Code") === "5707" ).sort(col("Country Group").desc).show(300,false)
+    println("dfArea country 5707")
+    dfArea.filter(dfArea("Country Code") === "5707" ).sort(col("Country Group").desc).show(300,false) 
+    
     qualityData(df,dfArea)
+    
   }
 
 
