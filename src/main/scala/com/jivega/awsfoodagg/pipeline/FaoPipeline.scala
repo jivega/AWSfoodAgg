@@ -17,6 +17,7 @@ class FaoPipeline (spark: SparkSession) {
     val dfArea = spark.read.option("header", "true").option("inferSchema","True").csv(pathArea)
     dfArea.printSchema()
     dfArea.show(300,false)
+    dfArea.filter(df("Country") === "Afghanistan" ).sort(col("Country Group").desc).show(300,false) 
     qualityData(df,dfArea)
   }
 
